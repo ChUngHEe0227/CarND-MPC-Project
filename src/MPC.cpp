@@ -11,7 +11,7 @@ using Eigen::VectorXd;
 // We set the number of timesteps to 25
 // and the timestep evaluation frequency or evaluation
 // period to 0.05.
-size_t  N = 25;
+size_t  N = 10;
 double dt = 0.05;
 
 // This value assumes the model presented in the classroom is used.
@@ -28,7 +28,7 @@ const double Lf = 2.67;
 
 // Both the reference cross track and orientation errors are 0.
 // The reference velocity is set to 40 mph.
-double ref_v = 40;
+double ref_v = 10;
 
 // The solver takes all the state variables and actuator
 // variables in a singular vector. Thus, we should to establish
@@ -250,8 +250,12 @@ std::vector<double> MPC::Solve(const VectorXd &x0, const VectorXd &coeffs) {
 
   auto cost = solution.obj_value;
   std::cout << "Cost " << cost << std::endl;
-  return {solution.x[x_start + 1],   solution.x[y_start + 1],
-          solution.x[psi_start + 1], solution.x[v_start + 1],
-          solution.x[cte_start + 1], solution.x[epsi_start + 1],
-          solution.x[delta_start],   solution.x[a_start]};
+  pred_x.clear();
+  pred_y.clear();
+  for (size_t i=0; i<N; i++){
+    pred_x.push_back(solution.x[x_start + i]);
+    pred_y.push_back(solution.x[y_start + i]);
+  }
+
+  return {solution.x[delta_start], solution.x[a_start]};
 }

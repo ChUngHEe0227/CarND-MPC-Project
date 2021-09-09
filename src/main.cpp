@@ -45,7 +45,17 @@ void glob_to_local(Eigen::VectorXd x_glob, Eigen::VectorXd y_glob,
 
 
 }
+void polyeval_vec(Eigen::VectorXd ptsx, Eigen::VectorXd coeffs, 
+                  vector<double> &ptsx_poly, vector<double> &ptsy_poly){
+  double px, py;
+  for(int i=0; i<ptsx.size(); i++){
+    px = ptsx[i];
+    ptsx_poly[i] = px; // x
 
+    py = polyeval(coeffs, px);
+    ptsy_poly[i] = py; // y
+  }
+}
 
 
 int main() {
@@ -128,7 +138,8 @@ int main() {
           // Display the MPC predicted trajectory 
           vector<double> mpc_x_vals;
           vector<double> mpc_y_vals;
-
+          mpc_x_vals = mpc.pred_x;
+          mpc_y_vals = mpc.pred_y;
           /**
            * TODO: add (x,y) points to list here, points are in reference to 
            *   the vehicle's coordinate system the points in the simulator are 
@@ -137,10 +148,12 @@ int main() {
 
           msgJson["mpc_x"] = mpc_x_vals;
           msgJson["mpc_y"] = mpc_y_vals;
+          vector<double> next_x_vals (ptsx.size());
+          vector<double> next_y_vals (ptsy.size());
+        
+          polyeval_vec(ptsx_local, coeffs, next_x_vals, next_y_vals);
 
           // Display the waypoints/reference line
-          vector<double> next_x_vals;
-          vector<double> next_y_vals;
 
           /**
            * TODO: add (x,y) points to list here, points are in reference to 
@@ -151,9 +164,8 @@ int main() {
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
 
-
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          std::cout << throttle_value << std::endl;
           // Latency
           // The purpose is to mimic real driving conditions where
           //   the car does actuate the commands instantly.
